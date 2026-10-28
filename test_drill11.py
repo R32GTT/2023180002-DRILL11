@@ -59,6 +59,16 @@ class BoyStateMachineTests(unittest.TestCase):
 
         self.assertGreater(auto_distance, normal_distance)
 
+    def test_autorun_returns_to_idle_after_five_seconds(self):
+        self.boy.handle_key_down(Drill11.SDLK_a)
+        auto_state = self.boy.machine.states['AUTORUN']
+        auto_state.elapsed = Drill11.AUTORUN_DURATION - 0.01
+
+        self.boy.update(0.02)
+
+        self.assertEqual(self.boy.state, 'IDLE')
+        self.assertEqual(self.boy.move_direction, 0)
+
 
 if __name__ == '__main__':
     unittest.main()
