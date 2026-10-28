@@ -69,6 +69,16 @@ class BoyStateMachineTests(unittest.TestCase):
         self.assertEqual(self.boy.state, 'IDLE')
         self.assertEqual(self.boy.move_direction, 0)
 
+    def test_direction_key_cancels_autorun_into_run(self):
+        self.boy.handle_key_down(Drill11.SDLK_a)
+        self.boy.handle_key_down(Drill11.SDLK_LEFT)
+
+        self.assertEqual(self.boy.state, 'RUN')
+        self.assertEqual(self.boy.move_direction, -1)
+
+        self.boy.handle_key_up(Drill11.SDLK_LEFT)
+        self.assertEqual(self.boy.state, 'IDLE')
+
 
 if __name__ == '__main__':
     unittest.main()
