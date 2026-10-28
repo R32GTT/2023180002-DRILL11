@@ -15,6 +15,11 @@ class BoyStateMachineTests(unittest.TestCase):
     def test_starts_in_idle(self):
         self.assertEqual(self.boy.state, 'IDLE')
 
+    def test_a_key_enters_autorun(self):
+        self.boy.handle_key_down(Drill11.SDLK_a)
+
+        self.assertEqual(self.boy.state, 'AUTORUN')
+
 
 if __name__ == '__main__':
     unittest.main()
