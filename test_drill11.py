@@ -79,6 +79,22 @@ class BoyStateMachineTests(unittest.TestCase):
         self.boy.handle_key_up(Drill11.SDLK_LEFT)
         self.assertEqual(self.boy.state, 'IDLE')
 
+    def test_autorun_bounces_at_both_canvas_edges(self):
+        self.boy.handle_key_down(Drill11.SDLK_a)
+        self.boy.x = 720
+        self.boy.set_direction(1)
+        self.boy.update(0.01)
+
+        self.assertEqual(self.boy.x, 725)
+        self.assertEqual(self.boy.move_direction, -1)
+
+        self.boy.x = 80
+        self.boy.set_direction(-1)
+        self.boy.update(0.01)
+
+        self.assertEqual(self.boy.x, 75)
+        self.assertEqual(self.boy.move_direction, 1)
+
 
 if __name__ == '__main__':
     unittest.main()
