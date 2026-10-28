@@ -7,6 +7,7 @@ CANVAS_WIDTH = 800
 CANVAS_HEIGHT = 600
 BOY_GROUND_Y = 90
 SPRITE_SIZE = 100
+AUTORUN_DISPLAY_SIZE = 150
 NORMAL_SPEED = 300.0
 AUTORUN_SPEED = 600.0
 AUTORUN_DURATION = 5.0
@@ -83,6 +84,7 @@ class AutoRunState(BoyState):
         self.elapsed = 0.0
         if self.boy.move_direction == 0:
             self.boy.move_direction = self.boy.face_direction
+        self.boy.keep_inside_canvas(AUTORUN_DISPLAY_SIZE)
 
     def update(self, delta_time):
         self.elapsed += delta_time
@@ -91,8 +93,7 @@ class AutoRunState(BoyState):
             self.boy.machine.change('IDLE')
             return
 
-        self.boy.x += self.boy.move_direction * AUTORUN_SPEED * delta_time
-        self.boy.keep_inside_canvas(SPRITE_SIZE)
+        self.boy.move_and_bounce(AUTORUN_SPEED, AUTORUN_DISPLAY_SIZE, delta_time)
 
     def handle_key_down(self, key):
         if key not in (SDLK_LEFT, SDLK_RIGHT):
@@ -160,6 +161,21 @@ class Boy:
         half_width = display_size / 2
         self.x = max(half_width, min(CANVAS_WIDTH - half_width, self.x))
 
+    def move_and_bounce(self, speed, display_size, delta_time):
+        half_width = display_size / 2
+        left_edge = half_width
+        right_edge = CANVAS_WIDTH - half_width
+        next_x = self.x + self.move_direction * speed * delta_time
+
+        if next_x <= left_edge:
+            self.x = left_edge
+            self.set_direction(1)
+        elif next_x >= right_edge:
+            self.x = right_edge
+            self.set_direction(-1)
+        else:
+            self.x = next_x
+
     def update(self, delta_time):
         self.machine.update(delta_time)
         self.frame_time += delta_time
@@ -176,10 +192,12 @@ class Boy:
         self.machine.handle_key_up(key)
 
     def draw(self):
-        if self.state in ('RUN', 'AUTORUN'):
+        is_running = self.state in ('RUN', 'AUTORUN')
+        if is_running:
             row = 0 if self.face_direction < 0 else 100
         else:
             row = 200 if self.face_direction < 0 else 300
+        draw_size = AUTORUN_DISPLAY_SIZE if self.state == 'AUTORUN' else SPRITE_SIZE
         self.image.clip_draw(
             self.frame * SPRITE_SIZE,
             row,
@@ -187,6 +205,8 @@ class Boy:
             SPRITE_SIZE,
             self.x,
             self.y,
+            draw_size,
+            draw_size,
         )
 
 
