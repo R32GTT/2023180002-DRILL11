@@ -95,6 +95,16 @@ class BoyStateMachineTests(unittest.TestCase):
         self.assertEqual(self.boy.x, 75)
         self.assertEqual(self.boy.move_direction, 1)
 
+    def test_autorun_is_drawn_larger_than_normal_size(self):
+        self.boy.handle_key_down(Drill11.SDLK_a)
+        self.boy.draw()
+
+        self.assertEqual(self.image.clip_draw.call_args.args[-2:], (150, 150))
+
+        self.boy.handle_key_down(Drill11.SDLK_LEFT)
+        self.boy.draw()
+        self.assertEqual(self.image.clip_draw.call_args.args[-2:], (100, 100))
+
 
 if __name__ == '__main__':
     unittest.main()
