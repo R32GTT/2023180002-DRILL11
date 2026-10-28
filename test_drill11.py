@@ -20,6 +20,19 @@ class BoyStateMachineTests(unittest.TestCase):
 
         self.assertEqual(self.boy.state, 'AUTORUN')
 
+    def test_left_and_right_share_run_state(self):
+        state_names = set(self.boy.machine.states)
+        self.assertEqual(state_names, {'IDLE', 'RUN', 'AUTORUN'})
+
+        self.boy.handle_key_down(Drill11.SDLK_LEFT)
+        self.assertEqual(self.boy.state, 'RUN')
+        self.assertEqual(self.boy.move_direction, -1)
+
+        self.boy.handle_key_up(Drill11.SDLK_LEFT)
+        self.boy.handle_key_down(Drill11.SDLK_RIGHT)
+        self.assertEqual(self.boy.state, 'RUN')
+        self.assertEqual(self.boy.move_direction, 1)
+
 
 if __name__ == '__main__':
     unittest.main()
