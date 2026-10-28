@@ -33,6 +33,18 @@ class BoyStateMachineTests(unittest.TestCase):
         self.assertEqual(self.boy.state, 'RUN')
         self.assertEqual(self.boy.move_direction, 1)
 
+    def test_run_moves_and_returns_to_idle_after_release(self):
+        start_x = self.boy.x
+        self.boy.handle_key_down(Drill11.SDLK_LEFT)
+        self.boy.update(0.1)
+
+        self.assertAlmostEqual(self.boy.x, start_x - 30)
+        self.assertEqual(self.boy.state, 'RUN')
+
+        self.boy.handle_key_up(Drill11.SDLK_LEFT)
+        self.assertEqual(self.boy.state, 'IDLE')
+        self.assertEqual(self.boy.move_direction, 0)
+
 
 if __name__ == '__main__':
     unittest.main()
