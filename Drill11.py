@@ -8,6 +8,8 @@ CANVAS_HEIGHT = 600
 BOY_GROUND_Y = 90
 SPRITE_SIZE = 100
 NORMAL_SPEED = 300.0
+AUTORUN_SPEED = 600.0
+AUTORUN_DURATION = 5.0
 ANIMATION_FPS = 12.0
 
 
@@ -37,7 +39,9 @@ class IdleState(BoyState):
     name = 'IDLE'
 
     def handle_key_down(self, key):
-        if key in (SDLK_LEFT, SDLK_RIGHT):
+        if key == SDLK_a:
+            self.boy.machine.change('AUTORUN')
+        elif key in (SDLK_LEFT, SDLK_RIGHT):
             self.boy.set_direction(-1 if key == SDLK_LEFT else 1)
             self.boy.keys_held.add(key)
             self.boy.machine.change('RUN')
@@ -68,11 +72,43 @@ class RunState(BoyState):
             self.boy.machine.change('IDLE')
 
 
+class AutoRunState(BoyState):
+    name = 'AUTORUN'
+
+    def __init__(self, boy):
+        super().__init__(boy)
+        self.elapsed = 0.0
+
+    def enter(self):
+        self.elapsed = 0.0
+        if self.boy.move_direction == 0:
+            self.boy.move_direction = self.boy.face_direction
+
+    def update(self, delta_time):
+        self.elapsed += delta_time
+        if self.elapsed >= AUTORUN_DURATION:
+            self.boy.move_direction = 0
+            self.boy.machine.change('IDLE')
+            return
+
+        self.boy.x += self.boy.move_direction * AUTORUN_SPEED * delta_time
+        self.boy.keep_inside_canvas(SPRITE_SIZE)
+
+    def handle_key_down(self, key):
+        if key not in (SDLK_LEFT, SDLK_RIGHT):
+            return
+
+        self.boy.keys_held.add(key)
+        self.boy.set_direction(-1 if key == SDLK_LEFT else 1)
+        self.boy.machine.change('RUN')
+
+
 class BoyStateMachine:
     def __init__(self, boy):
         self.states = {
             'IDLE': IdleState(boy),
             'RUN': RunState(boy),
+            'AUTORUN': AutoRunState(boy),
         }
         self.current = self.states['IDLE']
         self.current.enter()
@@ -140,7 +176,7 @@ class Boy:
         self.machine.handle_key_up(key)
 
     def draw(self):
-        if self.state == 'RUN':
+        if self.state in ('RUN', 'AUTORUN'):
             row = 0 if self.face_direction < 0 else 100
         else:
             row = 200 if self.face_direction < 0 else 300
