@@ -45,6 +45,20 @@ class BoyStateMachineTests(unittest.TestCase):
         self.assertEqual(self.boy.state, 'IDLE')
         self.assertEqual(self.boy.move_direction, 0)
 
+    def test_autorun_speed_exceeds_normal_run_speed(self):
+        normal_start_x = self.boy.x
+        self.boy.handle_key_down(Drill11.SDLK_RIGHT)
+        self.boy.update(0.1)
+        normal_distance = self.boy.x - normal_start_x
+
+        auto_boy = Drill11.Boy()
+        auto_start_x = auto_boy.x
+        auto_boy.handle_key_down(Drill11.SDLK_a)
+        auto_boy.update(0.1)
+        auto_distance = auto_boy.x - auto_start_x
+
+        self.assertGreater(auto_distance, normal_distance)
+
 
 if __name__ == '__main__':
     unittest.main()
